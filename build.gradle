@@ -59,6 +59,12 @@ dependencies {
     testRuntimeOnly     'org.junit.platform:junit-platform-launcher'
 }
 
+jar {
+    manifest {
+        attributes('Implementation-Version': project.version)
+    }
+}
+
 shadowJar {
     manifest {
         attributes 'Main-Class': 'net.jmp.ecs.Main'
