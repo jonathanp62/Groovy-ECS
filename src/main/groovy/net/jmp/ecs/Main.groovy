@@ -30,17 +30,77 @@ package net.jmp.ecs
  * SOFTWARE.
  */
 
+import groovy.cli.picocli.CliBuilder
+
 /**
  * The main class for the ECS application
+ *
+ * @param   args    String[]    The command line arguments
  */
 static void main(String[] args) {
     /* Getting the version from the build.gradle file only works for jar deployments */
 
-    def version = getClass().package.implementationVersion
+    run(getClass().package.implementationVersion, args as List<String>)
+}
 
-    if (version == null) {
-        println "Hello ECS!"
+/**
+ * The run method for the ECS application
+ *
+ * @param   version String          The version of the application
+ * @param   args    List<String>    The command line arguments
+ */
+static void run(String version, List<String> args) {
+    /* Setting up the command line interface */
+
+    def cli = new CliBuilder(usage: 'ecs [options] <file>')
+
+    if (args.isEmpty()) {
+        cli.usage()
     } else {
-        println "Hello ECS, version $version!"
+        cli.v(longOpt: 'version', 'Show version information')
+        cli.h(longOpt: 'help', 'Show help usage')
+        cli.f(longOpt: 'file', args: 1, argName: 'file', 'Target file to process')
+        cli.p(longOpt: 'pretty-print', 'Pretty print output (requires --file)')
+
+        def options = cli.parse(args)
+
+        if (!options) return    // Parse error already reported by CliBuilder
+
+        /* Help */
+
+        if (options.h) {
+            cli.usage()
+            return
+        }
+
+        /* Enforce dependency: --pretty-print requires --file */
+
+        if (options.p && !options.f) {
+            System.err.println "ecs: --pretty-print requires --file"
+            cli.usage()
+            return
+        }
+
+        /* File */
+
+        if (options.f) {
+            println "ecs: File: ${options.f}"
+
+            if (options.p) {
+                println "ecs: Pretty printing enabled"
+            }
+
+            return
+        }
+
+        /* Version */
+
+        if (options.v) {
+            if (version == null) {
+                System.err.println "ecs: Version unavailable"
+            } else {
+                println "ecs: Version $version"
+            }
+        }
     }
 }

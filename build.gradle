@@ -70,7 +70,7 @@ shadowJar {
         attributes 'Main-Class': 'net.jmp.ecs.Main'
     }
 
-    archiveBaseName.set('ecs')
+    archiveFileName = "ecs-${project.version}.jar"
 }
 
 test {
