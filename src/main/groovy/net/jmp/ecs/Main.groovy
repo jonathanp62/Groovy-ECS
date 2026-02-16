@@ -40,7 +40,9 @@ import groovy.cli.picocli.CliBuilder
 static void main(String[] args) {
     /* Getting the version from the build.gradle file only works for jar deployments */
 
-    run(getClass().package.implementationVersion, args as List<String>)
+    int exitValue = run(getClass().package.implementationVersion, args as List<String>)
+
+    System.exit(exitValue)
 }
 
 /**
@@ -49,13 +51,14 @@ static void main(String[] args) {
  * @param   version String          The version of the application
  * @param   args    List<String>    The command line arguments
  */
-static void run(String version, List<String> args) {
+static int run(String version, List<String> args) {
     /* Setting up the command line interface */
 
     def cli = new CliBuilder(usage: 'ecs [options] <file>')
 
     if (args.isEmpty()) {
         cli.usage()
+        return 1
     } else {
         cli.v(longOpt: 'version', 'Show version information')
         cli.h(longOpt: 'help', 'Show help usage')
@@ -70,7 +73,7 @@ static void run(String version, List<String> args) {
 
         if (options.h) {
             cli.usage()
-            return
+            return 1
         }
 
         /* Enforce dependency: --pretty-print requires --file */
@@ -78,19 +81,36 @@ static void run(String version, List<String> args) {
         if (options.p && !options.f) {
             System.err.println "ecs: --pretty-print requires --file"
             cli.usage()
-            return
+            return 1
         }
 
         /* File */
 
         if (options.f) {
-            println "ecs: File: ${options.f}"
+            def file = new File(options.f)
+
+            if (!file.exists()) {
+                System.err.println "ecs: File ${options.f} does not exist"
+                return 1
+            }
+
+            if (!file.isFile()) {
+                System.err.println "ecs: File ${options.f} is not a file"
+                return 1
+            }
+
+            if (!file.name.endsWith(".json")) {
+                System.err.println "ecs: File ${options.f} is not a JSON file"
+                return
+            }
+
+            println "ecs: File: $file.name"
 
             if (options.p) {
                 println "ecs: Pretty printing enabled"
             }
 
-            return
+            return 0
         }
 
         /* Version */
@@ -98,8 +118,10 @@ static void run(String version, List<String> args) {
         if (options.v) {
             if (version == null) {
                 System.err.println "ecs: Version unavailable"
+                return 1
             } else {
                 println "ecs: Version $version"
+                return 0
             }
         }
     }
