@@ -65,12 +65,21 @@ jar {
     }
 }
 
+/* ./gradlew shadowJar --no-configuration-cache */
+
 shadowJar {
     manifest {
         attributes 'Main-Class': 'net.jmp.ecs.Main'
     }
 
     archiveFileName = "ecs-${project.version}.jar"
+
+    doLast {
+        copy {
+            from archiveFile
+            into "/usr/local/ecs/lib"
+        }
+    }
 }
 
 test {
