@@ -42,7 +42,7 @@ class Main {
     static void main(String[] args) {
         /* Getting the version from the build.gradle file only works for jar deployments */
 
-        def version = getClass().package.implementationVersion
+        def version = Main.class.package?.implementationVersion
         int exitValue = run(version, args as List<String>)
 
         System.exit(exitValue)

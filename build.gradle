@@ -69,7 +69,10 @@ jar {
 
 shadowJar {
     manifest {
-        attributes 'Main-Class': 'net.jmp.ecs.Main'
+        attributes(
+                'Main-Class': 'net.jmp.ecs.Main',
+                'Implementation-Version': project.version
+        )
     }
 
     archiveFileName = "ecs-${project.version}.jar"
