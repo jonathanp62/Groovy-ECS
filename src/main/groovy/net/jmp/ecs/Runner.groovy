@@ -187,10 +187,6 @@ class Runner {
 
             println "ecs: File: $file.name"
 
-            if (options.p) {
-                println "ecs: Pretty printing enabled"
-            }
-
             Formatter formatter = new Formatter(file, options.p)
 
             return formatter.format()

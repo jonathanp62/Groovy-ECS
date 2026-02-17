@@ -30,6 +30,7 @@ package net.jmp.ecs
  * SOFTWARE.
  */
 
+import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
 /**
@@ -54,32 +55,62 @@ class Formatter {
     }
 
     /**
-     * Format the JSON file
+     * Format the ECS log file
      *
      * @return  int The exit code
      */
     int format() {
+        if (this.prettyPrint) {
+            return this.formatAsJson()
+        } else {
+            return this.formatAsText()
+        }
+    }
+
+    /**
+     * Format the ECS log file lined text
+     *
+     * @return  int The exit code
+     */
+    private int formatAsText() {
         def jsonSlurper = new JsonSlurper()
         int exitCode = 0
 
-        this.jsonFile.eachLine { line ->
-            try {
-                def entry = jsonSlurper.parseText(line)
+        try {
+            this.jsonFile.eachLine { line ->
+                try {
+                    def entry = jsonSlurper.parseText(line)
 
-                def timestamp = entry.'@timestamp' ?: 'N/A'
-                def level = entry.'log.level'?.toUpperCase() ?: 'N/A'
-                def message = entry.message ?: 'N/A'
-                def version = entry.'service.version' ?: 'N/A'
+                    def timestamp = entry.'@timestamp' ?: 'N/A'
+                    def level = entry.'log.level'?.toUpperCase() ?: 'N/A'
+                    def message = entry.message ?: 'N/A'
+                    def version = entry.'service.version' ?: 'N/A'
+                    def threadName = entry.'process.thread.name' ?: 'N/A'
+                    def thread = threadName.substring(Math.max(0, threadName.length() - 17))
 
-                println "[${timestamp}] [${version}] ${level.padRight(5)} ${message}"
-            } catch (Exception e) {
-                System.err.println "ecs: Exception: ${e.message}"
-                System.err.println "ecs: Error parsing line: ${line}"
-
-                exitCode = 1
+                    println "[${timestamp}] [${version}] [${thread.padRight(17)}] ${level.padRight(5)} ${message}"
+                } catch (Exception e) {
+                    throw e
+                }
             }
+        } catch (Exception e) {
+            System.err.println "ecs: Exception: ${e.message}"
+            System.err.println "ecs: Error parsing file: ${this.jsonFile.path}"
+
+            exitCode = 1
         }
 
         return exitCode
+    }
+
+    /**
+     * Format the ECS log file as pretty-printed JSON
+     *
+     * @return  int The exit code
+     */
+    private int formatAsJson() {
+        println JsonOutput.prettyPrint(this.jsonFile.text)
+
+        return 0
     }
 }
