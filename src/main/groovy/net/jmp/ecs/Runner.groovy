@@ -45,6 +45,9 @@ class Runner {
     /** The command line interface */
     private def cli
 
+    /** The parsed command line options */
+    private def options
+
     /**
      * The constructor
      *
@@ -71,15 +74,15 @@ class Runner {
             return 1
         }
 
-        def options = this.parseOptions()
+        this.options = this.parseOptions()
 
-        if (!options) return 1
+        if (!this.options) return 1
 
-        if (this.handleHelp(options) == 1) return 1
-        if (this.handleVersion(options) == 1) return 1
-        if (this.validateOptions(options) == 1) return 1
+        if (this.handleHelp() == 1) return 1
+        if (this.handleVersion() == 1) return 1
+        if (this.validateOptions() == 1) return 1
 
-        return this.handleFile(options)
+        return this.handleFile()
     }
 
     /**
@@ -110,11 +113,10 @@ class Runner {
     /**
      * Handle the version option
      *
-     * @param   options def The parsed options
-     * @return  int         The exit code
+     * @return  int The exit code
      */
-    private int handleVersion(def options) {
-        if (options.v) {
+    private int handleVersion() {
+        if (this.options.v) {
             if (this.version == null) {
                 System.err.println "ecs: Version unavailable"
                 return 1
@@ -130,11 +132,10 @@ class Runner {
     /**
      * Handle the help option
      *
-     * @param   options def The parsed options
-     * @return  int         The exit code
+     * @return  int The exit code
      */
-    private int handleHelp(def options) {
-        if (options.h) {
+    private int handleHelp() {
+        if (this.options.h) {
             this.cli.usage()
             return 1
         }
@@ -145,13 +146,12 @@ class Runner {
     /**
      * Validate the parsed options
      *
-     * @param   options def The parsed options
-     * @return  int         The exit code
+     * @return  int The exit code
      */
-    private int validateOptions(def options) {
+    private int validateOptions() {
         /* Enforce dependency: --pretty-print requires --file */
 
-        if (options.p && !options.f) {
+        if (this.options.p && !this.options.f) {
             System.err.println "ecs: --pretty-print requires --file"
             this.cli.usage()
             return 1
@@ -163,31 +163,30 @@ class Runner {
     /**
      * Handle the file option
      *
-     * @param   options def The parsed options
-     * @return  int         The exit code
+     * @return  int The exit code
      */
-    private int handleFile(def options) {
-        if (options.f) {
-            def file = new File(options.f)
+    private int handleFile() {
+        if (this.options.f) {
+            def file = new File((String) this.options.f)
 
             if (!file.exists()) {
-                System.err.println "ecs: File ${options.f} does not exist"
+                System.err.println "ecs: File ${this.options.f} does not exist"
                 return 1
             }
 
             if (!file.isFile()) {
-                System.err.println "ecs: File ${options.f} is not a file"
+                System.err.println "ecs: File ${this.options.f} is not a file"
                 return 1
             }
 
             if (!file.name.endsWith(".json")) {
-                System.err.println "ecs: File ${options.f} is not a JSON file"
+                System.err.println "ecs: File ${this.options.f} is not a JSON file"
                 return 1
             }
 
             println "ecs: File: $file.name"
 
-            Formatter formatter = new Formatter(file, options.p)
+            Formatter formatter = new Formatter(file, (boolean) this.options.p)
 
             return formatter.format()
         }
