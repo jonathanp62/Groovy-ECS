@@ -88,7 +88,7 @@ class Formatter {
                     def entry = jsonSlurper.parseText(line)
 
                     def rawTimestamp = entry.'@timestamp'
-                    def timestamp = rawTimestamp ? this.localizeTimestamp(rawTimestamp.toString()) : 'N/A'
+                    def timestamp = rawTimestamp ? localizeTimestamp(rawTimestamp.toString()) : 'N/A'
                     def level = entry.'log.level'?.toUpperCase() ?: 'N/A'
                     def message = entry.message ?: 'N/A'
                     def version = entry.'service.version' ?: 'N/A'
@@ -127,7 +127,7 @@ class Formatter {
      * @param   isoTimestampInUtc   String The ISO timestamp in UTC
      * @return                      String The localized timestamp
      */
-    private String localizeTimestamp(String isoTimestampInUtc) {
+    private static String localizeTimestamp(String isoTimestampInUtc) {
         def timeZone = ZoneId.systemDefault()
         def locale = Locale.getDefault()
         def instant = Instant.parse(isoTimestampInUtc)
