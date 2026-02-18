@@ -33,6 +33,12 @@ package net.jmp.ecs
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
+import java.time.Instant
+import java.time.ZoneId
+
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
+
 /**
  * The formatter class for the ECS application
  */
@@ -81,7 +87,8 @@ class Formatter {
                 try {
                     def entry = jsonSlurper.parseText(line)
 
-                    def timestamp = entry.'@timestamp' ?: 'N/A'
+                    def rawTimestamp = entry.'@timestamp'
+                    def timestamp = rawTimestamp ? this.localizeTimestamp(rawTimestamp.toString()) : 'N/A'
                     def level = entry.'log.level'?.toUpperCase() ?: 'N/A'
                     def message = entry.message ?: 'N/A'
                     def version = entry.'service.version' ?: 'N/A'
@@ -112,5 +119,23 @@ class Formatter {
         println JsonOutput.prettyPrint(this.jsonFile.text)
 
         return 0
+    }
+
+    /**
+     * Localize the timestamp
+     *
+     * @param   isoTimestampInUtc   String The ISO timestamp in UTC
+     * @return                      String The localized timestamp
+     */
+    private String localizeTimestamp(String isoTimestampInUtc) {
+        def timeZone = ZoneId.systemDefault()
+        def locale = Locale.getDefault()
+        def instant = Instant.parse(isoTimestampInUtc)
+        def zonedDateTime = instant.atZone(timeZone)
+        def formatter = DateTimeFormatter
+                            .ofLocalizedDateTime(FormatStyle.MEDIUM)
+                            .withLocale(locale)
+
+        return formatter.format(zonedDateTime)
     }
 }
