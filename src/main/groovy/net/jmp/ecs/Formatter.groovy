@@ -96,6 +96,30 @@ class Formatter {
                     def thread = threadName.substring(Math.max(0, threadName.length() - 17))
 
                     println "[${timestamp}] [${version}] [${thread.padRight(17)}] ${level.padRight(5)} ${message}"
+
+                    def errorType = entry.error?.type ?: entry.'error.type'
+
+                    if (errorType) {
+                        println " |_ ${errorType}"
+                    }
+
+                    def errorMessage = entry.error?.message ?: entry.'error.message'
+
+                    if (errorMessage) {
+                        println " |_ ${errorMessage}"
+                    }
+
+                    def errorStackTrace = entry.error?.stack_trace ?: entry.'error.stack_trace'
+
+                    if (errorStackTrace) {
+                        if (errorStackTrace instanceof Collection) {
+                            errorStackTrace.each { st ->
+                                println " |_ ${st}"
+                            }
+                        } else {
+                            println " |_ ${errorStackTrace}"
+                        }
+                    }
                 } catch (Exception e) {
                     throw e
                 }
