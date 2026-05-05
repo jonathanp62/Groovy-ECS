@@ -1,4 +1,5 @@
 /*
+ * (#)build.gradle  1.1.0   05/05/2026
  * (#)build.gradle  1.0.0   02/16/2026
  *
  * @author   Jonathan Parker
@@ -30,7 +31,7 @@
 
 plugins {
     id 'groovy'
-    id 'com.gradleup.shadow'                    version '9.3.1'
+    id 'com.gradleup.shadow'                    version '9.4.1'
     id 'net.jmp.gradle.plugin.projectinfo-info' version '0.2.0'
 }
 
@@ -38,12 +39,12 @@ apply plugin: 'net.jmp.gradle.plugin.projectinfo-info'
 
 ext {
     project.group = 'net.jmp.ecs'
-    project.version = '1.0.0'
+    project.version = '1.1.0'
     project.description = 'to provide ECS formatting'
 }
 
 group = 'net.jmp.ecs'
-version = '1.0.0'
+version = '1.1.0'
 
 repositories {
     mavenLocal()
@@ -51,7 +52,7 @@ repositories {
 }
 
 dependencies {
-    implementation      'org.apache.groovy:groovy-all:4.0.30'
+    implementation      'org.apache.groovy:groovy-all:4.0.31'
 
     testImplementation  platform('org.junit:junit-bom:5.10.0')
     testImplementation  'org.junit.jupiter:junit-jupiter'
